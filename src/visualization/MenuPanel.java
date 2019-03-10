@@ -7,11 +7,15 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
 
 import pathfinding.Cell;
@@ -33,9 +37,10 @@ public class MenuPanel extends JPanel implements ActionListener {
 	}
 	
 	private Point mousePos, myPos;
-	private JButton[] buttons = new JButton[Function.values().length];
 	private GridPanel grid;
 	private Pathfinder<Cell> pf = null;
+	private Map<Function,JButton> buttons = new HashMap<Function,JButton>(Function.values().length);
+	private JSlider delaySlider = new JSlider(Pathfinder.MIN_DELAY, Pathfinder.MAX_DELAY, 100);
 	
 	public MenuPanel(int x, int y, GridPanel grid) {
 		super();
@@ -61,43 +66,64 @@ public class MenuPanel extends JPanel implements ActionListener {
 			}
 		});
 		
+		// Create button controls
 		for (int i = 0; i < Function.values().length; i++) {
-			JButton b = new JButton(Function.values()[i].toString());
-			buttons[i] = b;
+			Function f = Function.values()[i];
+			JButton b = new JButton(f.toString());
+			buttons.put(f, b);
 			b.addActionListener(this);
 			b.setActionCommand(Function.values()[i].name());
 			add(b);
 		}
-		buttons[1].setEnabled(false);
+		buttons.get(Function.STOP).setEnabled(false);
+		
+		// Format delay slider
+		JLabel delayLabel = new JLabel("Delay (ms)", JLabel.CENTER);
+		add(delayLabel);
+		delaySlider.setMajorTickSpacing(500);
+		delaySlider.setMinorTickSpacing(100);
+		delaySlider.setPaintTicks(true);
+		delaySlider.setPaintLabels(true);
+		add(delaySlider);
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		switch (Function.valueOf(e.getActionCommand())) {
 			case START:
-				//buttons[0].setEnabled(false);
-				if (grid.hasPath()) {
-					if (pf == null) {
-						pf = new Pathfinder<Cell>(grid.getCells(), 0, grid::repaint);
-						pf.start();
-					} else {
-						pf.resume();
-					}
+				buttons.get(Function.START).setEnabled(false);
+				if (pf == null) {
+					startPathfinder();
 				} else {
-					JOptionPane.showMessageDialog(null, "Please create start/end cells to find a path between them.");
+					pf.resume();
 				}
 				break;
 			case STOP:
+				buttons.get(Function.START).setEnabled(true);
+				pf.stop();
 				pf = null;
-				buttons[0].setEnabled(true);
 				break;
 			case STEP:
-				// TODO
+				if (pf == null) {
+					startPathfinder();
+				} else {
+					pf.pause();
+					pf.pathfindStep();
+				}
 				break;
 			case CLEAR:
 				grid.clearCells();
 				pf = null;
 				break;
+		}
+	}
+	
+	private void startPathfinder() {
+		if (grid.hasPath()) {
+			pf = new Pathfinder<Cell>(grid.getCells(), delaySlider.getValue(), grid::repaint);
+			pf.start();
+		} else {
+			JOptionPane.showMessageDialog(null, "Please create start/end cells to find a path between them.");
 		}
 	}
 	

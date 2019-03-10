@@ -23,6 +23,7 @@ public abstract class Node {
 		throw new UnsupportedOperationException("Can't calculate distance for generic Node");
 	}*/
 	
+	// TODO: maybe make this "canTravel()" and also add a "considered" field
 	public boolean canVisit() {
 		return true;
 	}

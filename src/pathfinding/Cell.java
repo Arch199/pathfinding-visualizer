@@ -9,7 +9,7 @@ public class Cell extends Node {
 	public static final Color
 		EMPTY_COL = Color.WHITE, WALL_COL = Color.BLACK,
 		START_COL = Color.RED, END_COL = Color.BLUE,
-		VISITED_COL = Color.GREEN;
+		VISITED_COL = Color.YELLOW, PATH_COL = Color.GREEN;
 	
 	private int i, j;
 	private Color col = EMPTY_COL;
