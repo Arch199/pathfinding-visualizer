@@ -10,9 +10,11 @@ import java.awt.event.MouseMotionAdapter;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import pathfinding.Cell;
 import pathfinding.Pathfinder;
 
 /*
@@ -20,13 +22,20 @@ import pathfinding.Pathfinder;
  */
 public class MenuPanel extends JPanel implements ActionListener {
 	private static final long serialVersionUID = 1L;
-	public static final int WIDTH = 250, HEIGHT = 100;
-	private static final String[] buttonNames = {"Start", "Stop", "Step"};
+	public static final int WIDTH = 300, HEIGHT = 100;
+	private enum Function {
+		START, STOP, STEP, CLEAR;
+		
+		@Override
+		public String toString() {
+			return name().substring(0,1).toUpperCase() + name().substring(1).toLowerCase();
+		}
+	}
 	
 	private Point mousePos, myPos;
-	private JButton[] buttons = new JButton[buttonNames.length];
+	private JButton[] buttons = new JButton[Function.values().length];
 	private GridPanel grid;
-	private Pathfinder pf = null;
+	private Pathfinder<Cell> pf = null;
 	
 	public MenuPanel(int x, int y, GridPanel grid) {
 		super();
@@ -52,11 +61,11 @@ public class MenuPanel extends JPanel implements ActionListener {
 			}
 		});
 		
-		for (int i = 0; i < buttonNames.length; i++) {
-			JButton b = new JButton(buttonNames[i]);
+		for (int i = 0; i < Function.values().length; i++) {
+			JButton b = new JButton(Function.values()[i].toString());
 			buttons[i] = b;
 			b.addActionListener(this);
-			b.setActionCommand(buttonNames[i]);
+			b.setActionCommand(Function.values()[i].name());
 			add(b);
 		}
 		buttons[1].setEnabled(false);
@@ -64,29 +73,36 @@ public class MenuPanel extends JPanel implements ActionListener {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		switch (e.getActionCommand()) {
-			case "Start":
+		switch (Function.valueOf(e.getActionCommand())) {
+			case START:
 				//buttons[0].setEnabled(false);
-				if (pf == null) {
-					pf = new Pathfinder(grid.getCells(), () -> grid.repaint());
-					pf.start();
+				if (grid.hasPath()) {
+					if (pf == null) {
+						pf = new Pathfinder<Cell>(grid.getCells(), 0, grid::repaint);
+						pf.start();
+					} else {
+						pf.resume();
+					}
 				} else {
-					pf.resume();
+					JOptionPane.showMessageDialog(null, "Please create start/end cells to find a path between them.");
 				}
 				break;
-			case "Stop":
+			case STOP:
 				pf = null;
 				buttons[0].setEnabled(true);
 				break;
-			case "Step":
+			case STEP:
+				// TODO
 				break;
-			default:
-				throw new IllegalArgumentException("Unknown action: " + e.getActionCommand());
+			case CLEAR:
+				grid.clearCells();
+				pf = null;
+				break;
 		}
 	}
 	
 	@Override
-    public Dimension getPreferredSize() {
-        return new Dimension(WIDTH, HEIGHT);
-    }
+	public Dimension getPreferredSize() {
+		return new Dimension(WIDTH, HEIGHT);
+	}
 }

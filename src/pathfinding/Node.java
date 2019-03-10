@@ -1,71 +1,35 @@
 package pathfinding;
 
-import java.awt.Color;
-
-import pathfinding.Graph;
-
-// Should probably be Cell and extend a Node class
-/*
- * Node for A* algorithm to pathfind through.
+/**
+ * A single node within a Graph.
  */
-public class Node {
-	public static final Color
-		EMPTY_COL = Color.WHITE, WALL_COL = Color.BLACK,
-		START_COL = Color.RED, END_COL = Color.BLUE,
-		VISITED_COL = Color.YELLOW;
+public abstract class Node {
+	private Graph<? extends Node> graph;
 	
-	private int i, j, gCost /* (distance from start) */, hCost /* (distance from end) */;
-	private Graph graph;
 	private Node parent;
-	private Color col = EMPTY_COL;
+	private int gCost /* (distance from start) */, hCost /* (distance from end) */;
+	private boolean visited = false;
 	
-	public Node(int i, int j, Graph graph) {
-		this.i = i;
-		this.j = j;
+	public Node(Graph<? extends Node> graph) {
 		this.graph = graph;
-	}
-	
-	@Override
-	public String toString() {
-		return "Node(" + i + ", " + j + ")";
-	}
-	
-	public int distanceTo(Node other) {
-		return (int)Math.sqrt(Math.pow(getX()-other.getX(), 2) + Math.pow(getY()-other.getY(), 2));
 	}
 	
 	public void clearPathData() {
 		parent = null;
 		gCost = hCost = 0;
-		if (col == VISITED_COL) {
-			col = EMPTY_COL;
-		}
 	}
+	
+	public abstract int distanceTo(Node other);/* {
+		throw new UnsupportedOperationException("Can't calculate distance for generic Node");
+	}*/
 	
 	public boolean canVisit() {
-		return col != WALL_COL;
+		return true;
 	}
 	
-	public boolean wasVisited() {
-		return col == VISITED_COL;
-	}
-	
-	public void visit() {
-		col = VISITED_COL;
-	}
-	
-	public int getX() {
-		return i * graph.getNodeWidth();
-	}
-	
-	public int getY() {
-		return j * graph.getNodeWidth();
-	}
-	
-	public int getI() { return i; }
-	public int getJ() { return j; }
+	Graph<? extends Node> getGraph() { return graph; }
 	public Node getParent() { return parent; }
-	public Color getColor() { return col; }
+	public boolean getVisited() { return visited; }
 	public int getGCost() {
 		if (gCost == 0) {
 			if (parent == null) {
@@ -90,6 +54,11 @@ public class Node {
 	
 	public void setGCost(int gCost) { this.gCost = gCost; }
 	public void setHCost(int hCost) { this.hCost = hCost; }
-	public void setParent(Node parent) { this.parent = parent; }
-	public void setColor(Color col) { this.col = col; }
+	public void setVisited(boolean visited) { this.visited = visited; }
+	public void setParent(Node parent) {
+		if (parent.getClass() != getClass()) {
+			throw new IllegalArgumentException("Connected nodes must have the same type");
+		}
+		this.parent = parent;
+	}
 }

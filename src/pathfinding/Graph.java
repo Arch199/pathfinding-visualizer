@@ -1,13 +1,15 @@
 package pathfinding;
 
+import java.util.List;
+
 import pathfinding.Node;
 
-public interface Graph {
-	public Node[] getConnected(Node node);
-	public int getNodeWidth();
-	public void setNodeWidth(int nodeWidth);
-	public Node getStart();
-	public Node getEnd();
-	public void setPath(Node start, Node end);
+public interface Graph<T extends Node> {
+	public List<T> getConnected(T node);
+	public int getNodeSize();
+	public void setNodeSize(int nodeWidth);
+	public T getStart();
+	public T getEnd();
+	public void setPath(T start, T end);
 	public void clearPathData();
 }
