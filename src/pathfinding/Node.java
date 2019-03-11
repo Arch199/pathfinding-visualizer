@@ -4,11 +4,12 @@ package pathfinding;
  * A single node within a Graph.
  */
 public abstract class Node {
-	private Graph<? extends Node> graph;
+	public enum State { DEFAULT, CONSIDERED, VISITING, ON_PATH }
 	
+	private Graph<? extends Node> graph;
 	private Node parent;
 	private int gCost /* (distance from start) */, hCost /* (distance from end) */;
-	private boolean visited = false;
+	private State state = State.DEFAULT;
 	
 	public Node(Graph<? extends Node> graph) {
 		this.graph = graph;
@@ -17,6 +18,7 @@ public abstract class Node {
 	public void clearPathData() {
 		parent = null;
 		gCost = hCost = 0;
+		state = State.DEFAULT;
 	}
 	
 	public abstract int distanceTo(Node other);/* {
@@ -24,13 +26,13 @@ public abstract class Node {
 	}*/
 	
 	// TODO: maybe make this "canTravel()" and also add a "considered" field
-	public boolean canVisit() {
+	public boolean canTravel() {
 		return true;
 	}
 	
 	Graph<? extends Node> getGraph() { return graph; }
 	public Node getParent() { return parent; }
-	public boolean getVisited() { return visited; }
+	public State getState() { return state; }
 	public int getGCost() {
 		if (gCost == 0) {
 			if (parent == null) {
@@ -55,7 +57,7 @@ public abstract class Node {
 	
 	public void setGCost(int gCost) { this.gCost = gCost; }
 	public void setHCost(int hCost) { this.hCost = hCost; }
-	public void setVisited(boolean visited) { this.visited = visited; }
+	public void setState(State state) { this.state = state; }
 	public void setParent(Node parent) {
 		if (parent.getClass() != getClass()) {
 			throw new IllegalArgumentException("Connected nodes must have the same type");

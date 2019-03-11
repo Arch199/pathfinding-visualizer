@@ -32,7 +32,7 @@ public class GridGraph implements Graph<Cell> {
 		int[] xOffsets = {1, 0, -1, 0}, yOffsets = {0, 1, 0, -1};
 		for (int counter = 0; counter < xOffsets.length; counter++) {
 			int x = xOffsets[counter], y = yOffsets[counter];
-			if (i+x >= 0 && i+x <= cells.length && j+y >= 0 && j+y <= cells[0].length && cells[i+x][j+y].canVisit()) {
+			if (i+x >= 0 && i+x <= cells.length && j+y >= 0 && j+y <= cells[0].length && cells[i+x][j+y].canTravel()) {
 				adjacents.add(cells[i+x][j+y]);
 			}
 		}

@@ -9,7 +9,7 @@ public class Cell extends Node {
 	public static final Color
 		EMPTY_COL = Color.WHITE, WALL_COL = Color.BLACK,
 		START_COL = Color.RED, END_COL = Color.BLUE,
-		VISITED_COL = Color.YELLOW, PATH_COL = Color.GREEN;
+		CONSIDERED_COL = Color.YELLOW, PATH_COL = Color.GREEN, VISITING_COL = Color.ORANGE;
 	
 	private int i, j;
 	private Color col = EMPTY_COL;
@@ -39,14 +39,14 @@ public class Cell extends Node {
 	@Override
 	public void clearPathData() {
 		super.clearPathData();
-		if (col == VISITED_COL) {
+		if (col == PATH_COL || col == CONSIDERED_COL) {
 			col = EMPTY_COL;
 		}
 	}
 	
 	@Override
-	public boolean canVisit() {
-		return col != WALL_COL;
+	public boolean canTravel() {
+		return col != WALL_COL && col != START_COL;
 	}
 	
 	public int getX() {
@@ -64,12 +64,13 @@ public class Cell extends Node {
 	public void setColor(Color col) { this.col = col; }
 	
 	@Override
-	public void setVisited(boolean visited) {
-		super.setVisited(visited);
-		if (visited) {
-			col = VISITED_COL;
-		} else {
-			col = EMPTY_COL;
+	public void setState(State state) {
+		super.setState(state);
+		switch (state) {
+			case ON_PATH: col = PATH_COL; break;
+			case CONSIDERED: col = CONSIDERED_COL; break;
+			case VISITING: col = VISITING_COL; break;
+			default: col = EMPTY_COL; break;
 		}
 	}
 }

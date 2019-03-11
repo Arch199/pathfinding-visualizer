@@ -17,6 +17,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import pathfinding.Cell;
 import pathfinding.Pathfinder;
@@ -84,6 +86,13 @@ public class MenuPanel extends JPanel implements ActionListener {
 		delaySlider.setMinorTickSpacing(100);
 		delaySlider.setPaintTicks(true);
 		delaySlider.setPaintLabels(true);
+		delaySlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				if (pf != null && delaySlider != null) {
+					pf.setDelay(delaySlider.getValue());
+				}
+			}
+		});
 		add(delaySlider);
 	}
 	
@@ -91,9 +100,11 @@ public class MenuPanel extends JPanel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		switch (Function.valueOf(e.getActionCommand())) {
 			case START:
-				buttons.get(Function.START).setEnabled(false);
+				buttons.get(Function.STOP).setEnabled(true);
 				if (pf == null) {
-					startPathfinder();
+					if (tryStartPathfinder()) {
+						buttons.get(Function.START).setEnabled(false);
+					}
 				} else {
 					pf.resume();
 				}
@@ -105,25 +116,40 @@ public class MenuPanel extends JPanel implements ActionListener {
 				break;
 			case STEP:
 				if (pf == null) {
-					startPathfinder();
-				} else {
+					tryStartPathfinder();
+				}
+				if (pf.isRunning()) {
 					pf.pause();
+				}
+				if (!pf.isStopped()) {
 					pf.pathfindStep();
 				}
 				break;
 			case CLEAR:
+				buttons.get(Function.START).setEnabled(true);
 				grid.clearCells();
 				pf = null;
 				break;
 		}
 	}
 	
-	private void startPathfinder() {
+	/**
+	 * Attempts to start the pathfinder.
+	 * @return A boolean representing whether the attempt succeeded or failed.
+	 */
+	private boolean tryStartPathfinder() {
 		if (grid.hasPath()) {
-			pf = new Pathfinder<Cell>(grid.getCells(), delaySlider.getValue(), grid::repaint);
+			pf = new Pathfinder<Cell>(grid.getCells(), grid::repaint, () -> {
+				pf = null;
+				buttons.get(Function.START).setEnabled(true);
+				buttons.get(Function.STOP).setEnabled(false);
+			});
+			pf.setDelay(delaySlider.getValue());
 			pf.start();
+			return true;
 		} else {
 			JOptionPane.showMessageDialog(null, "Please create start/end cells to find a path between them.");
+			return false;
 		}
 	}
 	
