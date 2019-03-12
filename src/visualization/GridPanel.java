@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -104,9 +105,15 @@ public class GridPanel extends JPanel {
 	}
 	
 	public void clearCells() {
+		clearCells(null);
+	}
+	
+	public void clearCells(Function<Color,Boolean> condition) {
 		cells.clearPathData();
 		forEachCell((i, j) -> {
-			cells.get(i, j).setColor(Cell.EMPTY_COL);
+			if (condition == null || condition.apply(cells.get(i, j).getColor())) {
+				cells.get(i, j).setColor(Cell.EMPTY_COL);
+			}
 		});
 		repaint();
 	}

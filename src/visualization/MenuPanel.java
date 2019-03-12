@@ -111,8 +111,14 @@ public class MenuPanel extends JPanel implements ActionListener {
 				break;
 			case STOP:
 				buttons.get(Function.START).setEnabled(true);
-				pf.stop();
-				pf = null;
+				if (pf == null || pf.isStopped()) {
+					// Clear away the previous Pathfinder's path
+					grid.clearCells(c -> c != Cell.WALL_COL && c != Cell.START_COL && c != Cell.END_COL);
+				} else {
+					// Stop the existing Pathfinder for good
+					pf.stop();
+					pf = null;
+				}
 				break;
 			case STEP:
 				if (pf == null) {
@@ -142,7 +148,6 @@ public class MenuPanel extends JPanel implements ActionListener {
 			pf = new Pathfinder<Cell>(grid.getCells(), grid::repaint, () -> {
 				pf = null;
 				buttons.get(Function.START).setEnabled(true);
-				buttons.get(Function.STOP).setEnabled(false);
 			});
 			pf.setDelay(delaySlider.getValue());
 			pf.start();
