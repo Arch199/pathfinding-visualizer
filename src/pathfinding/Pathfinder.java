@@ -23,8 +23,7 @@ public abstract class Pathfinder {
 		}
 		this.graph = graph;
 		this.onUpdate = onUpdate;
-		this.onFinish = onFinish;	
-		System.out.println("Starting at " + graph.getStart() + ", going to " + graph.getEnd());
+		this.onFinish = onFinish;
 	}
 	
 	public abstract void pathfindStep();

@@ -8,9 +8,7 @@ import java.awt.event.MouseWheelListener;
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 
-/*
- * Main handler for rendering, event listening, etc.
- */
+/** Main handler for rendering, event listening, etc. */
 public class App implements MouseWheelListener {
 	public static final int
 		WINDOW_W = 600, WINDOW_H = 600,

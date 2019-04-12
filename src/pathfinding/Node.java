@@ -3,7 +3,7 @@ package pathfinding;
 /**
  * A single node within a Graph.
  */
-public abstract class Node {
+public abstract class Node implements Comparable<Node> {
 	public enum State { DEFAULT, CONSIDERED, VISITING, ON_PATH }
 	
 	private Graph graph;
@@ -28,6 +28,11 @@ public abstract class Node {
 	// TODO: maybe make this "canTravel()" and also add a "considered" field
 	public boolean canTravel() {
 		return true;
+	}
+	
+	@Override
+	public int compareTo(Node other) {
+	    return Integer.compare(cost, other.cost);
 	}
 	
 	Graph getGraph() { return graph; }

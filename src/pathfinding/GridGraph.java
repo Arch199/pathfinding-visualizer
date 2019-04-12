@@ -13,12 +13,9 @@ import java.util.List;
 public class GridGraph implements Graph {	
 	private Cell[][] cells;
 	private Cell start, end;
-	private final int width, height;
 	private int cellSize;
 	
 	public GridGraph(int width, int height, int cellSize) {
-		this.width = width;
-		this.height = height;
 		this.cellSize = cellSize;
 		cells = new Cell[width][height];
 		for (int i = 0; i < width; i++) {
@@ -36,7 +33,7 @@ public class GridGraph implements Graph {
 		int[] xOffsets = {1, 0, -1, 0}, yOffsets = {0, 1, 0, -1};
 		for (int counter = 0; counter < xOffsets.length; counter++) {
 			int x = xOffsets[counter], y = yOffsets[counter];
-			if (i+x >= 0 && i+x <= cells.length && j+y >= 0 && j+y <= cells[0].length && cells[i+x][j+y].canTravel()) {
+			if (i+x >= 0 && i+x < cells.length && j+y >= 0 && j+y < cells[0].length && cells[i+x][j+y].canTravel()) {
 				adjacents.add(cells[i+x][j+y]);
 			}
 		}
@@ -55,17 +52,16 @@ public class GridGraph implements Graph {
 	@Override
 	public void clearPathData() {
 		start = end = null;
-		for (int i = 0; i < width; i++) {
-			for (int j = 0; j < height; j++) {
-				cells[i][j].clearPathData();
-			}
+		for (Node node : this) {
+		    node.clearPathData();
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
     public Iterator<Node> iterator() {
-        return (Iterator<Node>)Arrays.asList(cells);
+        return Arrays.stream(cells)
+               .flatMap(column -> Arrays.stream(column).map(cell -> (Node)cell))
+               .iterator();
     }
 	
 	@Override public int getNodeSize() { return cellSize; }
@@ -141,11 +137,13 @@ public class GridGraph implements Graph {
 	    @Override
 	    public void setState(State state) {
 	        super.setState(state);
-	        switch (state) {
-	            case ON_PATH: col = PATH_COL; break;
-	            case CONSIDERED: col = CONSIDERED_COL; break;
-	            case VISITING: col = VISITING_COL; break;
-	            default: col = EMPTY_COL; break;
+	        if (col != START_COL && col != END_COL) {
+    	        switch (state) {
+    	            case ON_PATH:col = PATH_COL; break;
+    	            case CONSIDERED: col = CONSIDERED_COL; break;
+    	            case VISITING: col = VISITING_COL; break;
+    	            default: col = EMPTY_COL; break;
+    	        }
 	        }
 	    }
 	}

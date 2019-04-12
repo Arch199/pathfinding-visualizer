@@ -13,10 +13,13 @@ public class DijkstraPathfinder extends Pathfinder {
         
         // Set the cost of the start node to 0 and the rest to the maximum
         for (Node node : graph) {
-            node.setCost(Integer.MAX_VALUE);
+            if (node == graph.getStart()) {
+                node.setCost(0);
+            } else {
+                node.setCost(Integer.MAX_VALUE);
+            }
             nodes.add(node);
         }
-        graph.getStart().setCost(0);
     }
     
     @Override
@@ -24,6 +27,11 @@ public class DijkstraPathfinder extends Pathfinder {
         // Visit the next best node from the priority queue
         Node current = nodes.remove();
         current.setState(Node.State.ON_PATH);
+        
+        // Stop if we've found our destination
+        if (current == graph.getEnd()) {
+            stop();
+        }
         
         // Explore the adjacent nodes, checking if they achieve smaller costs
         for (Node next : graph.getConnected(current)) {
