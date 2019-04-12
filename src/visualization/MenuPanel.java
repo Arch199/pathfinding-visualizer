@@ -20,7 +20,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import pathfinding.Cell;
+import pathfinding.GridGraph.Cell;
 import pathfinding.Pathfinder;
 
 /*
@@ -40,7 +40,7 @@ public class MenuPanel extends JPanel implements ActionListener {
 	
 	private Point mousePos, myPos;
 	private GridPanel grid;
-	private Pathfinder<Cell> pf = null;
+	private Pathfinder pf = null;
 	private Map<Function,JButton> buttons = new HashMap<Function,JButton>(Function.values().length);
 	private JSlider delaySlider = new JSlider(Pathfinder.MIN_DELAY, Pathfinder.MAX_DELAY, 100);
 	
@@ -145,7 +145,7 @@ public class MenuPanel extends JPanel implements ActionListener {
 	 */
 	private boolean tryStartPathfinder() {
 		if (grid.hasPath()) {
-			pf = new Pathfinder<Cell>(grid.getCells(), grid::repaint, () -> {
+			pf = Pathfinder.create(Pathfinder.Algorithm.DIJKSTRA, grid.getCells(), grid::repaint, () -> {
 				pf = null;
 				buttons.get(Function.START).setEnabled(true);
 			});

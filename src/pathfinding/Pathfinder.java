@@ -1,26 +1,21 @@
 package pathfinding;
 
-import java.util.List;
-
-import pathfinding.Node;
-
 /**
- * Executor of the pathfinding algorithm (A*).
- * Parametrized with the specific Node type used by the given Graph.
+ * Executor of a pathfinding algorithm.
  */
-public class Pathfinder<T extends Node> {
+public abstract class Pathfinder {
 	public static final int MIN_DELAY = 0, MAX_DELAY = 2000;
+	public enum Algorithm { DIJKSTRA }; // TODO: implement more algorithms e.g. A*
 	private enum State { STOPPED, RUNNING, PAUSED };
 	
+	protected Graph graph;
 	private Thread thread;
-	private Graph<T> graph;
-	private T parent;
 	private Runnable onUpdate, onFinish;
 	private volatile State state = State.STOPPED;
 	/** Delay between steps in milliseconds. */
 	private volatile int delay = 0;
 	
-	public Pathfinder(Graph<T> graph, Runnable onUpdate, Runnable onFinish) {
+	public Pathfinder(Graph graph, Runnable onUpdate, Runnable onFinish) {
 		if (graph.getStart() == null || graph.getEnd() == null) {
 			throw new IllegalArgumentException("Graph must have start and end nodes");
 		} else if (onUpdate == null || onFinish == null) {
@@ -28,12 +23,13 @@ public class Pathfinder<T extends Node> {
 		}
 		this.graph = graph;
 		this.onUpdate = onUpdate;
-		this.onFinish = onFinish;
-		parent = graph.getStart();		
-		System.out.println("Starting at " + parent + ", going to " + graph.getEnd());
+		this.onFinish = onFinish;	
+		System.out.println("Starting at " + graph.getStart() + ", going to " + graph.getEnd());
 	}
 	
-	public void start() {
+	public abstract void pathfindStep();
+	
+	public final void start() {
 		if (state != State.STOPPED) {
 			throw new IllegalStateException("Can't start; pathfinder is already running");
 		}
@@ -45,7 +41,8 @@ public class Pathfinder<T extends Node> {
 						if (state == State.PAUSED) {
 							wait();
 						} else {
-							pathfindStep();
+						    pathfindStep();
+							onUpdate.run();
 							if (delay > 0) {
 								wait(delay);
 							}
@@ -61,14 +58,14 @@ public class Pathfinder<T extends Node> {
 		state = State.RUNNING;
 	}
 	
-	public void pause() {
+	public final void pause() {
 		if (state != State.RUNNING) {
-			throw new IllegalStateException("Can't pause; pathfinder is not running");	
+			throw new IllegalStateException("Can't pause; pathfinder is not running");
 		}
 		state = State.PAUSED;
 	}
 	
-	public void resume() {
+	public final void resume() {
 		if (state != State.PAUSED) {
 			throw new IllegalStateException("Can't resume; pathfinder is not paused");
 		}
@@ -78,7 +75,7 @@ public class Pathfinder<T extends Node> {
 		}
 	}
 	
-	public void stop() {
+	public final void stop() {
 		if (state == State.STOPPED) {
 			throw new IllegalStateException("Can't stop; pathfinder is already stopped");
 		} else if (state == State.PAUSED) {
@@ -90,8 +87,8 @@ public class Pathfinder<T extends Node> {
 		onFinish.run();
 	}
 	
-	@SuppressWarnings("unchecked")
-	public void pathfindStep() {
+	//@SuppressWarnings("unchecked")
+	/*public void pathfindStep(); {
 		T bestNode = null;
 		int minCost = -1;
 		List<T> connected = graph.getConnected(parent);
@@ -146,14 +143,22 @@ public class Pathfinder<T extends Node> {
 				bestNode.setState(Node.State.VISITING);
 			}
 		}
-		onUpdate.run();
+	}*/
+	
+	public static final Pathfinder create(Algorithm algorithm, Graph graph, Runnable onUpdate, Runnable onFinish) {
+	   switch (algorithm) {
+	   case DIJKSTRA:
+	       return new DijkstraPathfinder(graph, onUpdate, onFinish);
+	   default:
+	       throw new IllegalArgumentException("Unknown algorithm " + algorithm);
+	   }
 	}
 	
-	public boolean isRunning() { return state == State.RUNNING; }
-	public boolean isPaused() { return state == State.PAUSED; }
-	public boolean isStopped() { return state == State.STOPPED; }
+	public final boolean isRunning() { return state == State.RUNNING; }
+	public final boolean isPaused() { return state == State.PAUSED; }
+	public final boolean isStopped() { return state == State.STOPPED; }
 	
-	public void setDelay(int delay) {
+	public final void setDelay(int delay) {
 		if (delay < MIN_DELAY || delay > MAX_DELAY) {
 			throw new IllegalArgumentException("Delay must be between " + MIN_DELAY + " and " + MAX_DELAY);
 		}

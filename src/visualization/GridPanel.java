@@ -15,8 +15,8 @@ import java.util.function.Function;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import pathfinding.Cell;
 import pathfinding.GridGraph;
+import pathfinding.GridGraph.Cell;
 
 public class GridPanel extends JPanel {
 	private static final long serialVersionUID = 1L;

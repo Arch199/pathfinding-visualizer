@@ -1,13 +1,16 @@
 package pathfinding;
 
+import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * A grid of Cells viewed as a Graph.
  */
-public class GridGraph implements Graph<Cell> {	
+public class GridGraph implements Graph {	
 	private Cell[][] cells;
 	private Cell start, end;
 	private final int width, height;
@@ -26,7 +29,8 @@ public class GridGraph implements Graph<Cell> {
 	}
 	
 	@Override
-	public List<Cell> getConnected(Cell cell) {
+	public List<Node> getConnected(Node node) {
+	    Cell cell = (Cell)node;
 		int i = cell.getI(), j = cell.getJ();
 		List<Cell> adjacents = new ArrayList<Cell>();
 		int[] xOffsets = {1, 0, -1, 0}, yOffsets = {0, 1, 0, -1};
@@ -40,12 +44,12 @@ public class GridGraph implements Graph<Cell> {
 	}
 	
 	@Override
-	public void setPath(Cell start, Cell end) {
+	public void setPath(Node start, Node end) {
 		if (start == null || end == null) {
 			throw new IllegalArgumentException("Both start and end must be valid cells");
 		}
-		this.start = start;
-		this.end = end;
+		this.start = (Cell)start;
+		this.end = (Cell)end;
 	}
 	
 	@Override
@@ -58,6 +62,12 @@ public class GridGraph implements Graph<Cell> {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	@Override
+    public Iterator<Node> iterator() {
+        return (Iterator<Node>)Arrays.asList(cells);
+    }
+	
 	@Override public int getNodeSize() { return cellSize; }
 	@Override public void setNodeSize(int nodeSize) { cellSize = nodeSize; }
 	@Override public Cell getStart() { return start; }
@@ -67,4 +77,76 @@ public class GridGraph implements Graph<Cell> {
 	public int getWidth() { return cells.length; }
 	public int getHeight() { return cells[0].length; }
 	
+	/**
+	 * A grid cell treated as a Node in a Graph.
+	 */
+	public static class Cell extends Node {
+	    public static final Color
+	        EMPTY_COL = Color.WHITE, WALL_COL = Color.BLACK,
+	        START_COL = Color.RED, END_COL = Color.BLUE,
+	        CONSIDERED_COL = Color.YELLOW, PATH_COL = Color.GREEN, VISITING_COL = Color.ORANGE;
+	    
+	    private int i, j;
+	    private Color col = EMPTY_COL;
+	    
+	    public Cell(int i, int j, GridGraph graph) {
+	        super(graph);
+	        this.i = i;
+	        this.j = j;
+	    }
+	    
+	    @Override
+	    public String toString() {
+	        return "Cell(" + i + ", " + j + ")";
+	    }
+	    
+	    @Override
+	    public int distanceTo(Node other) {
+	        Cell cell;
+	        try {
+	            cell = (Cell)other;
+	        } catch (ClassCastException e) {
+	            throw new IllegalArgumentException("Cannot calculate distance to Node of a different type");
+	        }
+	        return (int)Math.hypot(getX()-cell.getX(), getY()-cell.getY());
+	    }
+	    
+	    @Override
+	    public void clearPathData() {
+	        super.clearPathData();
+	        if (col == PATH_COL || col == CONSIDERED_COL) {
+	            col = EMPTY_COL;
+	        }
+	    }
+	    
+	    @Override
+	    public boolean canTravel() {
+	        return col != WALL_COL && col != START_COL;
+	    }
+	    
+	    public int getX() {
+	        return i * getGraph().getNodeSize();
+	    }
+	    
+	    public int getY() {
+	        return j * getGraph().getNodeSize();
+	    }
+	    
+	    public int getI() { return i; }
+	    public int getJ() { return j; }
+	    public Color getColor() { return col; }
+	    
+	    public void setColor(Color col) { this.col = col; }
+	    
+	    @Override
+	    public void setState(State state) {
+	        super.setState(state);
+	        switch (state) {
+	            case ON_PATH: col = PATH_COL; break;
+	            case CONSIDERED: col = CONSIDERED_COL; break;
+	            case VISITING: col = VISITING_COL; break;
+	            default: col = EMPTY_COL; break;
+	        }
+	    }
+	}
 }

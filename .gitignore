@@ -1,4 +1,3 @@
-# Ignore everything but .gitignore and files in /src/
 bin/
 .*
 !.gitignore
