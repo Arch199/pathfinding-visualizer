@@ -26,10 +26,14 @@ public class DijkstraPathfinder extends Pathfinder {
     public void pathfindStep() {        
         // Visit the next best node from the priority queue
         Node current = nodes.remove();
-        current.setState(Node.State.ON_PATH);
+        current.setState(Node.State.VISITING);
         
         // Stop if we've found our destination
         if (current == graph.getEnd()) {
+            Node parent = graph.getEnd();
+            do {
+                parent.setState(Node.State.ON_PATH);
+            } while ((parent = parent.getParent()) != null);
             stop();
         }
         
@@ -40,13 +44,14 @@ public class DijkstraPathfinder extends Pathfinder {
                 nodes.remove(next);
                 next.setCost(newCost);
                 next.setParent(current);
-                next.setState(Node.State.VISITING);
+                next.setState(Node.State.CONSIDERED);
                 nodes.add(next);
             }
         }
         
         // Stop if the priority queue is empty
         if (nodes.isEmpty()) {
+            System.out.println("Priority queue is empty :(");
             stop();
         }
     }

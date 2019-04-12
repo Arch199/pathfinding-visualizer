@@ -4,8 +4,19 @@ package pathfinding;
  * Executor of a pathfinding algorithm.
  */
 public abstract class Pathfinder {
-	public static final int MIN_DELAY = 0, MAX_DELAY = 2000;
-	public enum Algorithm { DIJKSTRA }; // TODO: implement more algorithms e.g. A*
+	public static final int MIN_DELAY = 0, MAX_DELAY = 1000;
+	// TODO: implement more algorithms e.g. A*
+	public enum Algorithm {
+	    DIJKSTRA("Dijkstra");
+	    private String name;
+	    private Algorithm(String name) {
+	        this.name = name;
+	    }
+	    public String toString() {
+	        return name;
+	        //return name().substring(0, 1) + name().substring(1).toLowerCase();
+	    }
+	};
 	private enum State { STOPPED, RUNNING, PAUSED };
 	
 	protected Graph graph;
@@ -82,7 +93,7 @@ public abstract class Pathfinder {
 				notify();
 			}
 		}
-		state = State.STOPPED;
+		state = State.STOPPED;		
 		onFinish.run();
 	}
 	

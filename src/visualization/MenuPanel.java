@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -22,13 +23,14 @@ import javax.swing.event.ChangeListener;
 
 import pathfinding.GridGraph.Cell;
 import pathfinding.Pathfinder;
+import pathfinding.Pathfinder.Algorithm;;
 
 /*
  * Container of the control menu.
  */
 public class MenuPanel extends JPanel implements ActionListener {
 	private static final long serialVersionUID = 1L;
-	public static final int WIDTH = 300, HEIGHT = 100;
+	public static final int WIDTH = 400, HEIGHT = 100;
 	private enum Function {
 		START, STOP, STEP, CLEAR;
 		
@@ -43,6 +45,7 @@ public class MenuPanel extends JPanel implements ActionListener {
 	private Pathfinder pf = null;
 	private Map<Function,JButton> buttons = new HashMap<Function,JButton>(Function.values().length);
 	private JSlider delaySlider = new JSlider(Pathfinder.MIN_DELAY, Pathfinder.MAX_DELAY, 100);
+	private JComboBox<Algorithm> algoChooser = new JComboBox<Algorithm>(Algorithm.values());
 	
 	public MenuPanel(int x, int y, GridPanel grid) {
 		super();
@@ -68,6 +71,9 @@ public class MenuPanel extends JPanel implements ActionListener {
 			}
 		});
 		
+		// Add algorithm dropdown box
+        add(algoChooser);
+		
 		// Create button controls
 		for (int i = 0; i < Function.values().length; i++) {
 			Function f = Function.values()[i];
@@ -82,8 +88,8 @@ public class MenuPanel extends JPanel implements ActionListener {
 		// Format delay slider
 		JLabel delayLabel = new JLabel("Delay (ms)", JLabel.CENTER);
 		add(delayLabel);
-		delaySlider.setMajorTickSpacing(500);
-		delaySlider.setMinorTickSpacing(100);
+		delaySlider.setMajorTickSpacing(250);
+		delaySlider.setMinorTickSpacing(50);
 		delaySlider.setPaintTicks(true);
 		delaySlider.setPaintLabels(true);
 		delaySlider.addChangeListener(new ChangeListener() {
