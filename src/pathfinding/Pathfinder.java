@@ -7,7 +7,7 @@ public abstract class Pathfinder {
 	public static final int MIN_DELAY = 0, MAX_DELAY = 1000;
 	// TODO: implement more algorithms e.g. A*
 	public enum Algorithm {
-	    DIJKSTRA("Dijkstra");
+	    DIJKSTRA("Dijkstra"), A_STAR("A*");
 	    private String name;
 	    private Algorithm(String name) {
 	        this.name = name;
@@ -37,7 +37,13 @@ public abstract class Pathfinder {
 		this.onFinish = onFinish;
 	}
 	
-	public abstract void pathfindStep();
+	/** Execute a single step of the pathfinding algorithm. */
+	protected abstract void pathfindStep();
+	
+	public void step() {
+	    pathfindStep();
+	    onUpdate.run();
+	}
 	
 	public final void start() {
 		if (state != State.STOPPED) {
@@ -51,8 +57,7 @@ public abstract class Pathfinder {
 						if (state == State.PAUSED) {
 							wait();
 						} else {
-						    pathfindStep();
-							onUpdate.run();
+						    step();
 							if (delay > 0) {
 								wait(delay);
 							}
@@ -159,9 +164,10 @@ public abstract class Pathfinder {
 	   switch (algorithm) {
 	   case DIJKSTRA:
 	       return new DijkstraPathfinder(graph, onUpdate, onFinish);
-	   default:
-	       throw new IllegalArgumentException("Unknown algorithm " + algorithm);
+	   case A_STAR:
+	       return new AStarPathfinder(graph, onUpdate, onFinish);
 	   }
+	   throw new IllegalArgumentException("Unknown algorithm " + algorithm);
 	}
 	
 	public final boolean isRunning() { return state == State.RUNNING; }
