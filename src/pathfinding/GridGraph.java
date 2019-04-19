@@ -104,7 +104,7 @@ public class GridGraph implements Graph {
 	        } catch (ClassCastException e) {
 	            throw new IllegalArgumentException("Cannot calculate distance to Node of a different type");
 	        }
-	        return (int)Math.hypot(getX()-cell.getX(), getY()-cell.getY());
+	        return (int)Math.hypot(getX() - cell.getX(), getY() - cell.getY());
 	    }
 	    
 	    @Override

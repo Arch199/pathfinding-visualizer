@@ -21,7 +21,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import pathfinding.GridGraph.Cell;
 import pathfinding.Pathfinder;
 import pathfinding.Pathfinder.Algorithm;;
 
@@ -119,7 +118,7 @@ public class MenuPanel extends JPanel implements ActionListener {
 				buttons.get(Function.START).setEnabled(true);
 				if (pf == null || pf.isStopped()) {
 					// Clear away the previous Pathfinder's path
-					grid.clearCells(c -> c != Cell.WALL_COL && c != Cell.START_COL && c != Cell.END_COL);
+					grid.clearPath();
 				} else {
 					// Stop the existing Pathfinder for good
 					pf.stop();
@@ -127,6 +126,8 @@ public class MenuPanel extends JPanel implements ActionListener {
 				}
 				break;
 			case STEP:
+			    buttons.get(Function.START).setEnabled(true);
+			    buttons.get(Function.STOP).setEnabled(true);
 				if (pf == null) {
 					tryStartPathfinder();
 				}
@@ -134,7 +135,7 @@ public class MenuPanel extends JPanel implements ActionListener {
 					pf.pause();
 				}
 				if (!pf.isStopped()) {
-					pf.pathfindStep();
+					pf.step();
 				}
 				break;
 			case CLEAR:
@@ -151,7 +152,7 @@ public class MenuPanel extends JPanel implements ActionListener {
 	 */
 	private boolean tryStartPathfinder() {
 		if (grid.hasPath()) {
-			pf = Pathfinder.create(Pathfinder.Algorithm.DIJKSTRA, grid.getCells(), grid::repaint, () -> {
+			pf = Pathfinder.create((Algorithm)algoChooser.getSelectedItem(), grid.getCells(), grid::repaint, () -> {
 				pf = null;
 				buttons.get(Function.START).setEnabled(true);
 			});

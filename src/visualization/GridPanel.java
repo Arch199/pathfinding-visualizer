@@ -2,6 +2,7 @@ package visualization;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
@@ -98,6 +99,19 @@ public class GridPanel extends JPanel {
 			g.fillRect(x, y, cellSize, cellSize);
 			g.setColor(Color.BLACK);
 			g.drawRect(x, y, cellSize, cellSize);
+			
+			// Draw node costs
+			int size = 4 * cellSize / App.MIN_CELL_SIZE;
+			if (size > 10) {
+			    g.setFont(new Font("Arial", Font.PLAIN, size));
+			    String costStr;
+			    if (cell.getCost() == Integer.MAX_VALUE) {
+			        costStr = "\u221e"; // infinity symbol
+			    } else {
+			        costStr = Integer.toString(cell.getCost());
+			    }
+	            g.drawString(costStr, x + cellSize / 8, y + cellSize / 2);
+			}
 		}
 	}
 	
@@ -105,12 +119,17 @@ public class GridPanel extends JPanel {
 		return start != null && end != null;
 	}
 	
-	public void clearCells() {
-		clearCells(null);
+	public void clearPath() {
+	    clearCells(c -> c != Cell.WALL_COL && c != Cell.START_COL && c != Cell.END_COL);
+	    cells.clearPathData();
 	}
 	
-	public void clearCells(Function<Color,Boolean> condition) {
-		cells.clearPathData();
+	public void clearCells() {
+        clearCells(null);
+        cells.clearPathData();
+    }
+	
+	private void clearCells(Function<Color,Boolean> condition) {
 		for (Node node : cells) {
 		    Cell cell = (Cell)node;
 			if (condition == null || condition.apply(cell.getColor())) {

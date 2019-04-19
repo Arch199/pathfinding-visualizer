@@ -16,16 +16,14 @@ public abstract class Node implements Comparable<Node> {
 		this.graph = graph;
 	}
 	
+	public abstract int distanceTo(Node other);
+	
 	public void clearPathData() {
 		parent = null;
-		//gCost = hCost = 0;
 		cost = 0;
 		state = State.DEFAULT;
 	}
 	
-	public abstract int distanceTo(Node other);
-	
-	// TODO: maybe make this "canTravel()" and also add a "considered" field
 	public boolean canTravel() {
 		return true;
 	}
@@ -38,33 +36,8 @@ public abstract class Node implements Comparable<Node> {
 	Graph getGraph() { return graph; }
 	public Node getParent() { return parent; }
 	public State getState() { return state; }
-	
-	/*public int getGCost() {
-		if (gCost == 0) {
-			if (parent == null) {
-				return 0;
-			}
-			gCost = distanceTo(parent) + parent.getGCost();
-		}
-		return gCost;
-	}
-	public int getHCost() {
-		if (hCost == 0) {
-			if (this == graph.getEnd()) {
-				return 0;
-			}
-			hCost = distanceTo(graph.getEnd());
-		}
-		return hCost;
-	}
-	public int getFCost() {
-		return getGCost() + getHCost();
-	}*/
 	public int getCost() { return cost; }
 	
-	/*public void setGCost(int gCost) { this.gCost = gCost; }
-	public void setHCost(int hCost) { this.hCost = hCost; }
-	*/
 	public void setCost(int cost) { this.cost = cost; } 
 	public void setState(State state) { this.state = state; }
 	public void setParent(Node parent) {
